@@ -19,10 +19,9 @@ train = pd.read_csv('/kaggle/input/nfl-big-data-bowl-2020/train.csv', low_memory
 
 
 
-##################################################################################################################################################################
-############################################################################ FUNCTIONS ###########################################################################
-##################################################################################################################################################################
-
+################################################################################################################################
+######################################################### FUNCTIONS ############################################################
+################################################################################################################################
 
 def preprocessing(df):
     
@@ -66,7 +65,7 @@ def preprocessing(df):
         return
     
     def standardizeGame(df):
-        #TO DO : OPTIMIZE 
+        #paste on https://www.kaggle.com/cpmpml/initial-wrangling-voronoi-areas-in-python
         df['ToLeft'] = df.PlayDirection == "left"
         df['IsBallCarrier'] = df.NflId == df.NflIdRusher 
         df['Dir_rad'] = np.mod(90 - df.Dir, 360) * math.pi/180.0
@@ -104,8 +103,6 @@ def preprocessing(df):
 
 
 #----------------------------------------
-
-
 def convertObjectFeatures(df):
 
     def convertStadiumType(stadiumType):
@@ -123,7 +120,7 @@ def convertObjectFeatures(df):
         elif stadiumType in unknownRoof:
             return np.nan
         else:
-#             print('error stadiumType : ', stadiumType)
+            print('error stadiumType : ', stadiumType)
             return np.nan
 
     def convertGameWeather(weather):
@@ -183,7 +180,8 @@ def convertObjectFeatures(df):
         else:
             print('error turf : ', turf)
             return np.nan
-        
+    
+    #TO DO : fix label encoder
     from sklearn import preprocessing
     LE = preprocessing.LabelEncoder()    
     df['PlayerWeight'] = round(df['PlayerWeight'].apply(lambda x: x*.453592), 2)
@@ -211,8 +209,6 @@ def createColumnsName(role, features):
     return [col + '_' + role for col in features]
     
 #----------------------------------------
-
-
 def createMultipleColumnsName(role, features, nbPlayers):
     """ add role + number for each element in features and repeat this operation for the nbPlayers """
     def createFeatures(role, features, nbPlayers=1):
@@ -316,9 +312,7 @@ def createPlayersPositionTrain(df, features):
         return df
     
     df = pd.DataFrame(df).transpose()
-    
     df = reshapingColumnStructure(df, features)
-    
     df_qb = pd.DataFrame([createUniquePlayer(df = df, position = 'QB', features = features)],
                          columns = createColumnsName(role = 'QB', features = features))
     df_c = pd.DataFrame([createUniquePlayer(df = df, position = 'C', features = features)], 
@@ -343,20 +337,16 @@ def createPlayersPositionTrain(df, features):
     return df_full
 
 #----------------------------------------
-
 def keepNonPlayersFeaturesTrain(df, features):
     """ keep the features that are not relative to players """
     df_base = df.drop(features, axis = 1, inplace = False).drop_duplicates('PlayId', inplace = False).reset_index(drop = True)
     return df_base
 
 #----------------------------------------
-
-
 def reshapingRowStructure(df, features):
     return pd.DataFrame(df[features].values.reshape(-1, 22*len(features)), columns=[features*22])
 
 #----------------------------------------
-
 def featuresEngineering(df):
     
     def timeToEndQuarter(clock):
@@ -411,8 +401,6 @@ def dropPositionCols(df):
     return df
 
 #----------------------------------------
-
-
 def createPlayersPositionTest(df, features):
     
     def keepNonPlayersFeatures(df, features):
@@ -520,7 +508,6 @@ def createPlayersPositionTest(df, features):
         return df
     
     df_base = keepNonPlayersFeatures(df = df, features = features)
-
     df_qb = pd.DataFrame([createUniquePlayer(df = df, position = 'QB', features = features)],
                          columns = createColumnsName(role = 'QB', features = features))
     df_c = pd.DataFrame([createUniquePlayer(df = df, position = 'C', features = features)], 
@@ -545,14 +532,14 @@ def createPlayersPositionTest(df, features):
     return df_full
     
     
-##################################################################################################################################################################
-################################################################### DATA PREPROCESSING ###########################################################################
-##################################################################################################################################################################
+################################################################################################################################
+##################################################### DATA PREPROCESSING #######################################################
+################################################################################################################################
 
 print('Start Data preprocessing ...')    
-preprocessing(df=train)
+preprocessing(df = train)
 print('... End preprocessing part 1 ...')   
-convertObjectFeatures(df=train)
+convertObjectFeatures(df = train)
 print('... End convert Object Features ...')   
 
 
@@ -586,9 +573,9 @@ print('... End Features engineering ...')
 print('... End Data preprocessing') 
 
 
-##################################################################################################################################################################
-######################################################################## MACHINE LEARNING ########################################################################
-##################################################################################################################################################################
+################################################################################################################################
+####################################################### MACHINE LEARNING #######################################################
+################################################################################################################################
 
 # Custom Evaluation Function :
 def convertValToArrayEval(arrayOfValue):
@@ -611,27 +598,9 @@ def evaluationFunction(preds, true, coeff=1000):
 
 
 # Data preparation 
-train.dropna(axis = 1, how= 'all', inplace = True)
+train.dropna(axis = 1, how = 'all', inplace = True)
 col_X = [col for col in train.columns.to_list() if col not in ["Yards", 'YardLine', 'GameId']]
 train['Yards'] = pd.DataFrame(train['Yards'] + 99, columns = ['Yards'])
-
-
-# x_train, y_train = train[col_X][train['Season'] == 2], train['Yards'][train['Season'] == 2]
-# x_validation, y_validation = train[col_X][train['Season'] == 1], train['Yards'][train['Season'] == 1]
-        
-# lgb_train = lightgbm.Dataset(x_train, y_train)
-# lgb_validation = lightgbm.Dataset(x_validation, y_validation)  
-
-# print('Start training ...')
-# evals_results={}
-# model = lightgbm.train(params=param_classifieur , train_set=lgb_train,
-#                                valid_sets=[lgb_train, lgb_validation], valid_names=['Train', 'Validation'],
-#                                feature_name = col_X,
-#                                feval=evaluationFunction,
-#                                evals_result=evals_results,
-#                                num_boost_round=1000,
-#                                early_stopping_rounds=10)
-# print('... End training')
 
 # Parametres LightGbm
 param_classifieur = {'boosting_type': 'gbdt', 
@@ -644,8 +613,8 @@ param_classifieur = {'boosting_type': 'gbdt',
                      'objective': 'multiclass',
                      'num_class':199,
                      'random_state': None,
-                     'reg_alpha': 5,
-                     'reg_lambda': 5,
+                     'reg_alpha': 5, # regularization
+                     'reg_lambda': 5, # regularization
                      'subsample_for_bin': 1000,
                      'subsample_freq':1,
                      'max_bin':30,
@@ -686,11 +655,12 @@ for train_index, test1_index in kf_train.split(train[train['Season'] == 2]):
 print('... End Training')
 
       
-##################################################################################################################################################################
-######################################################################## PREDICTION ##############################################################################
-##################################################################################################################################################################
+################################################################################################################################
+######################################################## SUBMISSION ############################################################
+################################################################################################################################
       
 print('Start prediction ...')
+
 
 for (test_df, sample_sub) in env.iter_test():
     ind = [test_df['PlayId'].values[0]]
@@ -706,5 +676,6 @@ for (test_df, sample_sub) in env.iter_test():
     prediction_test.index.name = 'PlayId'
     env.predict(prediction_test)
 env.write_submission_file()
+
 
 print('... End prediction')
