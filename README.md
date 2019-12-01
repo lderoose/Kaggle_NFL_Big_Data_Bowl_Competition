@@ -1,6 +1,6 @@
 # Kaggle_NFL_Big_Data_Bowl_Competition
 ************************************************************************************
-$Task : predict how many yards an american football team will gain on rushing play$
+Task : predict how many yards an american football team will gain on rushing play
 ************************************************************************************
 Details of the competition : https://www.kaggle.com/c/nfl-big-data-bowl-2020/overview
 
