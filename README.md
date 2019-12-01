@@ -1,5 +1,7 @@
 # Kaggle_NFL_Big_Data_Bowl_Competition
-
+************************************************************************************
+$Task : predict how many yards an american footaball team will gain on rushing play$
+************************************************************************************
 Details of the competition : https://www.kaggle.com/c/nfl-big-data-bowl-2020/overview
 
 Evaluation : Submissions will be evaluated on the Continuous Ranked Probability Score (CRPS). For each PlayId, you must predict a cumulative probability distribution for the yardage gained or lost. 
