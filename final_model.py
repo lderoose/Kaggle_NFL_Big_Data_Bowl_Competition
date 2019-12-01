@@ -607,7 +607,7 @@ param_classifieur = {'boosting_type': 'gbdt',
                      'colsample_bytree': .7, 
                      'learning_rate': 0.01,
                      'max_depth': 6, 
-                     'min_sample_leaf':1,
+                     'min_sample_leaf':20,
                      'subsample':1, 
                      'num_leaves': 30,
                      'objective': 'multiclass',
@@ -672,7 +672,7 @@ for (test_df, sample_sub) in env.iter_test():
     prediction_test = prediction_test.cumsum(axis=1)
     prediction_test.columns = ['Yards'+str(i) for i in range(-99,100)]
     prediction_test.index = ind
-    prediction_test = prediction_test.apply(lambda x: int(1) if x.values>=1. else x.values, axis = 0) #don't be overt 1
+    prediction_test = prediction_test.apply(lambda x: int(1) if x.values>=1. else x.values, axis = 0) #not > 1
     prediction_test.index.name = 'PlayId'
     env.predict(prediction_test)
 env.write_submission_file()
